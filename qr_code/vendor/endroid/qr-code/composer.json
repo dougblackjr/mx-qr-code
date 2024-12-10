@@ -1,7 +1,7 @@
 {
     "name": "endroid/qr-code",
     "description": "Endroid QR Code",
-    "keywords": ["endroid", "qrcode", "qr", "code", "bundle", "php"],
+    "keywords": ["endroid", "qrcode", "qr", "code", "php"],
     "homepage": "https://github.com/endroid/qr-code",
     "type": "library",
     "license": "MIT",
@@ -12,18 +12,20 @@
         }
     ],
     "require": {
-        "php": ">=7.2",
-        "ext-gd": "*",
-        "bacon/bacon-qr-code": "^2.0",
-        "endroid/installer": "^1.1.5",
-        "khanamiryan/qrcode-detector-decoder": "^1.0.2",
-        "myclabs/php-enum": "^1.5",
-        "symfony/http-foundation": "^3.4|^4.0",
-        "symfony/options-resolver": "^3.4|^4.0",
-        "symfony/property-access": "^3.4|^4.0"
+        "php": "^8.2",
+        "bacon/bacon-qr-code": "^3.0"
     },
     "require-dev": {
-        "endroid/test": "^1.1.4"
+        "ext-gd": "*",
+        "endroid/quality": "dev-main",
+        "khanamiryan/qrcode-detector-decoder": "^2.0.2",
+        "setasign/fpdf": "^1.8.2"
+    },
+    "suggest": {
+        "ext-gd": "Enables you to write PNG images",
+        "khanamiryan/qrcode-detector-decoder": "Enables you to use the image validator",
+        "roave/security-advisories": "Makes sure package versions with known security issues are not installed",
+        "setasign/fpdf": "Enables you to use the PDF writer"
     },
     "autoload": {
         "psr-4": {
@@ -35,9 +37,18 @@
             "Endroid\\QrCode\\Tests\\": "tests/"
         }
     },
+    "config": {
+        "sort-packages": true,
+        "preferred-install": {
+            "endroid/*": "source"
+        },
+        "allow-plugins": {
+            "endroid/installer": true
+        }
+    },
     "extra": {
         "branch-alias": {
-            "dev-master": "3.x-dev"
+            "dev-main": "6.x-dev"
         }
     }
 }
