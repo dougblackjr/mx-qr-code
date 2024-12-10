@@ -3,8 +3,15 @@ namespace Mx\Qr_code;
 
 require_once __DIR__.'/vendor/autoload.php';
 
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\Label\LabelAlignment;
 use Endroid\QrCode\QrCode;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 
 
 /**
@@ -29,6 +36,7 @@ $plugin_info = array(
 class Qr_code
 {
     public $return_data = '';
+    public $info;
 
     private $ecc_levels = array(
             'L' => 'low',
@@ -131,28 +139,35 @@ class Qr_code
             $qrcode_version = $data['v'];
             $qrcode_image_type = $data['t'];
 
-            $qrCode = new QrCode($qrcode_data_string);
+            $writer = new PngWriter();
 
-            $qrCode->setSize($data['s']);
-            $qrCode->setMargin($data['margin']);
-            $qrCode->setErrorCorrectionLevel(new ErrorCorrectionLevel($data['e']));
-            $qrCode->setForegroundColor($this->hex2rgba($data['px_color'], $data['px_opacity']));
-            $qrCode->setBackgroundColor($this->hex2rgba($data['bk_color'], $data['bk_opacity']));
+            $qrCode = new QrCode(
+                data: $qrcode_data_string,
+                size: $data['s'],
+                margin: $data['margin'],
+                errorCorrectionLevel: ErrorCorrectionLevel::High,
+                foregroundColor: new Color(...($this->hex2rgba($data['px_color'], $data['px_opacity']))),
+                backgroundColor: new Color(...($this->hex2rgba($data['bk_color'], $data['bk_opacity']))),
+            );
 
             if ($data['logo']) {
-                $qrCode->setLogoPath($this->url2local($data['logo']));
                 if ($data['logo_size']) {
                     $size = explode(',', $data['logo_size']);
                     if (2 == count($size)) {
                         $qrCode->setLogoSize($size[0], $size[1]);
                     }
                 }
+                $logo = new Logo(
+                    path: $this->url2local($data['logo'])
+                );
             }
 
+            $result = $writer->write($qrCode);
+
             if ('yes' == $data['base64_encode']) {
-                $output = 'data:image/png;base64, '.base64_encode($qrCode->writeString());
+                $output = 'data:image/png;base64, '.base64_encode($result->getString());
             } else {
-                $qrCode->writeFile($base_cache.$file_name);
+                $result->saveToFile($base_cache.$file_name);
                 $output = reduce_double_slashes('/'.str_replace($base_path, '', $base_cache.$file_name));
             }
         } else {
@@ -246,7 +261,7 @@ class Qr_code
         $output['g'] = $rgb[1];
         $output['b'] = $rgb[2];
         //Return rgb(a) color string
-        return $output;
+        return array_values($output);
     }
 
     /**
